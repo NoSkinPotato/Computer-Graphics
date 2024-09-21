@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL 2D Triangle</title>
+    <style>
+        #redButton{
+            position: absolute;
+            top: 600px;
+            left: 50px;
+            height: 100px;
+            width: 100px;
+            background-color: red;
+        }
+
+        #blueButton{
+            position: absolute;
+            top: 600px;
+            left: 200px;
+            height: 100px;
+            width: 100px;
+            background-color: blue;
+        }
+
+        #greenButton{
+            position: absolute;
+            top: 600px;
+            left: 350px;
+            height: 100px;
+            width: 100px;
+            background-color: green;
+        }
+
+        #redButton1{
+            position: absolute;
+            top: 500px;
+            left: 75px;
+            height: 50px;
+            width: 50px;
+            background-color: red;
+        }
+
+        #blueButton1{
+            position: absolute;
+            top: 500px;
+            left: 225px;
+            height: 50px;
+            width: 50px;
+            background-color: blue;
+        }
+
+        #greenButton1{
+            position: absolute;
+            top: 500px;
+            left: 375px;
+            height: 50px;
+            width: 50px;
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="glCanvas" width="600" height="400"></canvas>
+    <button id="redButton"></button>
+    <button id="greenButton"></button>
+    <button id="blueButton"></button>
+
+    <button id="redButton1"></button>
+    <button id="greenButton1"></button>
+    <button id="blueButton1"></button>
+    <script>
+        function initWebGL(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const gl = canvas.getContext('webgl');
+            if (!gl) {
+                console.error('WebGL not supported');
+                throw new Error('WebGL not supported');
+            }
+            return gl;
+        }
+
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        function createProgram(gl, vertexShader, fragmentShader) {
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Program linking error:', gl.getProgramInfoLog(program));
+                throw new Error('Program linking error');
+            }
+            return program;
+        }
+
+        function createBuffer(gl, data) {
+            const buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+            return buffer;
+        }
+
+        function setupAttribute(gl, program, attributeName, size, type, normalize, stride, offset) {
+            const location = gl.getAttribLocation(program, attributeName);
+            gl.enableVertexAttribArray(location);
+            gl.vertexAttribPointer(location, size, type, normalize, stride, offset);
+        }
+
+        function drawTriangle(gl, program) {
+            gl.useProgram(program);
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+        }
+
+        function main() {
+            const gl = initWebGL('glCanvas');
+
+            const vertexShaderSource = `
+                attribute vec2 a_position;
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                }
+            `;
+
+            const fragmentShaderSource = `
+                precision mediump float;
+                uniform vec4 uColor;
+                void main() {
+                    gl_FragColor = uColor;
+                }
+            `;
+            
+            const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+            const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        
+            const program = createProgram(gl, vertexShader, fragmentShader);
+
+            const colorLocation = gl.getUniformLocation(program, 'uColor');
+
+            const vertices = [
+                0.0, 0.5,    // Top vertex
+                -0.5, -0.5,  // Bottom-left vertex
+                0.5, -0.5    // Bottom-right vertex
+            ];
+
+            createBuffer(gl, vertices);
+            setupAttribute(gl, program, 'a_position', 2, gl.FLOAT, false, 0, 0);
+            drawTriangle(gl, program);
+            
+            var backColor = [0.0,0.0,0.0,1.0];
+
+            var redbutton = document.getElementById("redButton1");
+            redbutton.addEventListener('click', function(){
+            
+                gl.useProgram(program);
+                gl.uniform4f(colorLocation, 1.0, 0.0, 0.0, 1.0);
+                gl.clearColor(backColor[0],backColor[1], backColor[2],backColor[3]);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.drawArrays(gl.TRIANGLES, 0, 3);
+            });
+        
+            var greenbutton = document.getElementById("greenButton1");
+            greenbutton.addEventListener('click', function(){
+            
+                gl.useProgram(program);
+                gl.uniform4f(colorLocation, 0.0, 1.0, 0.0, 1.0);
+                gl.clearColor(backColor[0],backColor[1], backColor[2],backColor[3]);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.drawArrays(gl.TRIANGLES, 0, 3);
+            });
+        
+            var bluebutton = document.getElementById("blueButton1");
+            bluebutton.addEventListener('click', function(){
+            
+                gl.useProgram(program);
+                gl.uniform4f(colorLocation, 0.0, 0.0, 1.0, 1.0);
+                gl.clearColor(backColor[0],backColor[1], backColor[2],backColor[3]);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.drawArrays(gl.TRIANGLES, 0, 3);
+                
+            });
+        
+            var redbutton = document.getElementById("redButton");
+            redbutton.addEventListener('click', function(){
+            
+                backColor = [1.0, 0.0, 0.0, 1.0];
+                gl.useProgram(program);
+                gl.clearColor(backColor[0],backColor[1], backColor[2],backColor[3]);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+            });
+        
+            var greenbutton = document.getElementById("greenButton");
+            greenbutton.addEventListener('click', function(){
+                backColor = [0.0, 1.0, 0.0, 1.0];
+                gl.useProgram(program);
+                gl.clearColor(backColor[0],backColor[1], backColor[2],backColor[3]);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.drawArrays(gl.TRIANGLES, 0, 3);
+            });
+        
+            var bluebutton = document.getElementById("blueButton");
+            bluebutton.addEventListener('click', function(){
+                backColor = [0.0, 0.0, 1.0, 1.0];
+                gl.useProgram(program);
+                gl.clearColor(backColor[0],backColor[1], backColor[2],backColor[3]);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.drawArrays(gl.TRIANGLES, 0, 3);
+            });
+
+        }
+
+        main();
+    </script>
+</body>
+</html>

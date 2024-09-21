@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #redButton{
+            position: absolute;
+            top: 70px;
+            left: 50px;
+            height: 50px;
+            width: 50px;
+
+            background-color: red;
+        }
+
+        #blueButton{
+            position: absolute;
+            top: 150px;
+            left: 50px;
+            height: 50px;
+            width: 50px;
+            background-color: blue;
+        }
+
+        #greenButton{
+            position: absolute;
+            top: 230px;
+            left: 50px;
+            height: 50px;
+            width: 50px;
+            background-color: green;
+        }
+
+
+    </style>
+</head>
+<body onload="main()">
+    <canvas id="glcanvas" width="640" height="480"></canvas>
+
+    <script src="drawRectangle.js"></script>
+    <button id="redButton"></button>
+    <button id="greenButton"></button>
+    <button id="blueButton"></button>
+</body>
+</html>
